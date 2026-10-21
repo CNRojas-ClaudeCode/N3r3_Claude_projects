@@ -1,0 +1,113 @@
+/*
+ * Tokens del sistema de diseño (fuente única).
+ * Todo componente debe consumir estas variables; no se permiten valores sueltos.
+ *
+ * Breakpoints (mobile first). CSS no admite variables en @media, por eso se documentan aquí
+ * y se usan únicamente estos valores en las media queries:
+ *   --bp-sm: 360px   (móvil base)
+ *   --bp-md: 768px   (tablet)
+ *   --bp-lg: 1024px  (desktop: sidebar fija)
+ *   --bp-xl: 1440px  (desktop amplio)
+ */
+:root {
+  /* Colores */
+  --color-background: #f7faff;
+  --color-surface: #ffffff;
+  --color-primary: #2f6bff;
+  --color-primary-hover: #1f5bf0;
+  --color-secondary: #eaf2ff;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-border: #e5e7eb;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-sidebar-bg: #ffffff;
+  --color-sidebar-active: #eaf2ff;
+
+  /* Derivados (calculados a partir de los tokens base) */
+  --color-on-primary: var(--color-surface);
+  --color-success-soft: color-mix(in srgb, var(--color-success) 12%, var(--color-surface));
+  --color-warning-soft: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
+  --color-error-soft: color-mix(in srgb, var(--color-error) 10%, var(--color-surface));
+  --color-success-text: color-mix(in srgb, var(--color-success) 55%, var(--color-text-primary));
+  --color-warning-text: color-mix(in srgb, var(--color-warning) 50%, var(--color-text-primary));
+  --color-error-text: color-mix(in srgb, var(--color-error) 70%, var(--color-text-primary));
+  --color-overlay: color-mix(in srgb, var(--color-text-primary) 40%, transparent);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-primary) 35%, transparent);
+
+  /* Tipografía */
+  --font-family: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-size-h1: 32px;
+  --font-weight-h1: 700;
+  --font-size-h2: 24px;
+  --font-weight-h2: 700;
+  --font-size-h3: 20px;
+  --font-weight-h3: 600;
+  --font-size-body: 14px;
+  --font-weight-body: 400;
+  --font-size-small: 12px;
+  --font-weight-small: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --line-height-tight: 1.25;
+  --line-height-body: 1.5;
+
+  /* Espaciado */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Radios */
+  --radius-input: 12px;
+  --radius-button: 12px;
+  --radius-card: 16px;
+  --radius-modal: 20px;
+  --radius-pill: 999px;
+
+  /* Sombras */
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.05);
+  --shadow-modal: 0 10px 30px rgba(0, 0, 0, 0.12);
+
+  /* Bordes */
+  --border-width: 1px;
+  --border: var(--border-width) solid var(--color-border);
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --header-height: 72px;
+  --content-max-width: 1280px;
+  --modal-max-width: 560px;
+  --auth-card-max-width: 420px;
+  --touch-target: 44px;
+  --icon-size: 20px;
+  --icon-size-lg: 24px;
+  --avatar-size: 36px;
+  --drawer-max-width: 85vw;
+  --modal-max-height: 92dvh;
+  --filter-min-width: 160px;
+  --spinner-border: 3px;
+  --disabled-opacity: 0.6;
+
+  /* Safe areas iOS */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  /* Capas */
+  --z-header: 30;
+  --z-sidebar: 40;
+  --z-overlay: 50;
+  --z-modal: 60;
+  --z-toast: 70;
+
+  /* Movimiento */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --spin-duration: 800ms;
+}

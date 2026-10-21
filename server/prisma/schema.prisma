@@ -1,0 +1,210 @@
+// Esquema de datos. Proveedor SQLite; diseñado para migrar a PostgreSQL cambiando `provider`
+// (sin enums nativos ni tipos exclusivos de SQLite). Ver SUPUESTOS.md.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  name                String
+  passwordHash        String
+  /// ADMINISTRADOR | EMPLEADO (validado en la aplicación contra ROLES.md)
+  role                String
+  active              Boolean              @default(true)
+  mustChangePassword  Boolean              @default(false)
+  failedLoginAttempts Int                  @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  passwordChangedAt   DateTime             @default(now())
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  sessions            Session[]
+  resetTokens         PasswordResetToken[]
+
+  @@index([role])
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  /// SHA-256 del token opaco que viaja en la cookie httpOnly
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Contador de intentos fallidos de login por IP
+model IpLoginThrottle {
+  ip             String    @id
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+  updatedAt      DateTime  @updatedAt
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  /// SHA-256 del token enviado por correo; el token en claro nunca se almacena
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+/// Bitácora inmutable (trigger en la migración bloquea UPDATE y DELETE dentro de la retención)
+model AuditLog {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  action     String
+  actorId    String?
+  actorEmail String?
+  targetType String?
+  targetId   String?
+  ip         String?
+  /// JSON serializado con detalles del evento
+  details    String?
+
+  @@index([createdAt])
+  @@index([action])
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  name        String
+  description String?
+  /// PRODUCTO | SERVICIO
+  type        String
+  /// Precio en centavos para evitar errores de punto flotante
+  priceCents  Int
+  /// Existencias; null para servicios
+  stock       Int?
+  active      Boolean   @default(true)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  invoiceItems InvoiceItem[]
+
+  @@index([name])
+  @@index([deletedAt])
+}
+
+model Client {
+  id         String    @id @default(cuid())
+  name       String
+  /// RFC opcional; único cuando se captura
+  taxId      String?   @unique
+  phone      String?
+  email      String?
+  address    String?
+  /// Días de crédito por defecto para facturas a crédito
+  creditDays Int       @default(30)
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  invoices   Invoice[]
+
+  @@index([name])
+}
+
+/// Factura (nota de venta interna; no es un CFDI). Importes en centavos.
+model Invoice {
+  id            String        @id @default(cuid())
+  /// Folio consecutivo
+  folio         Int           @unique
+  clientId      String
+  client        Client        @relation(fields: [clientId], references: [id])
+  /// CONTADO | CREDITO
+  paymentType   String
+  /// VIGENTE | ANULADA (el estado de pago se deriva del saldo)
+  status        String        @default("VIGENTE")
+  totalCents    Int
+  /// Saldo pendiente (total - pagos y abonos)
+  balanceCents  Int
+  /// Vencimiento (solo crédito)
+  dueDate       DateTime?
+  notes         String?
+  createdById   String
+  createdByName String
+  voidedAt      DateTime?
+  voidedById    String?
+  voidReason    String?
+  createdAt     DateTime      @default(now())
+  items         InvoiceItem[]
+  payments      Payment[]
+
+  @@index([clientId])
+  @@index([status, balanceCents])
+  @@index([createdAt])
+}
+
+/// Partida de factura: guarda una copia del código, nombre y precio vigentes al facturar
+model InvoiceItem {
+  id             String  @id @default(cuid())
+  invoiceId      String
+  invoice        Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product @relation(fields: [productId], references: [id])
+  code           String
+  name           String
+  productType    String
+  quantity       Int
+  unitPriceCents Int
+  lineTotalCents Int
+
+  @@index([invoiceId])
+  @@index([productId])
+}
+
+/// Pago (liquida el saldo) o abono (pago parcial). Inmutable.
+model Payment {
+  id            String   @id @default(cuid())
+  invoiceId     String
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id])
+  /// PAGO | ABONO
+  kind          String
+  amountCents   Int
+  /// EFECTIVO | TARJETA | TRANSFERENCIA
+  method        String
+  reference     String?
+  createdById   String
+  createdByName String
+  createdAt     DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([createdAt])
+}
+
+model TrainingMaterial {
+  id          String   @id @default(cuid())
+  title       String
+  category    String
+  description String?
+  /// Texto plano (nunca se interpreta como HTML)
+  content     String
+  /// Enlace externo opcional (solo https)
+  url         String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([active])
+}

@@ -1,0 +1,46 @@
+/* Página offline independiente del bundle: replica los tokens del sistema de diseño (src/styles/tokens.css). */
+:root {
+  --color-background: #f7faff;
+  --color-surface: #ffffff;
+  --color-primary: #2f6bff;
+  --color-primary-hover: #1f5bf0;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --radius-button: 12px;
+  --touch-target: 44px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  font-size: 14px;
+  padding: max(var(--space-4), env(safe-area-inset-top)) max(var(--space-4), env(safe-area-inset-right))
+    max(var(--space-4), env(safe-area-inset-bottom)) max(var(--space-4), env(safe-area-inset-left));
+}
+.offline { text-align: center; display: grid; gap: var(--space-3); justify-items: center; max-width: 360px; }
+.offline h1 { font-size: 24px; font-weight: 700; margin: 0; }
+.offline p { color: var(--color-text-secondary); margin: 0; }
+.offline__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-5);
+  margin-top: var(--space-2);
+  border-radius: var(--radius-button);
+  background: var(--color-primary);
+  color: var(--color-surface);
+  font-weight: 600;
+  text-decoration: none;
+}
+.offline__button:hover { background: var(--color-primary-hover); }

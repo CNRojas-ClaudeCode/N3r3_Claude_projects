@@ -1,0 +1,23 @@
+node_modules/
+dist/
+coverage/
+
+# Variables de entorno (nunca versionar)
+.env
+.env.*
+!.env.example
+
+# Bases de datos SQLite locales
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Bandeja de correo local (tokens de recuperación en desarrollo)
+.mail-outbox/
+.test-outbox/
+.audit-outbox/
+
+*.log
+.DS_Store
+Thumbs.db
